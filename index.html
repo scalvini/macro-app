@@ -193,26 +193,26 @@ let pct = {...DEFAULT};
 
 // Food database — per 100 g of RAW food: {protein, carbs, fat} grams
 const FOODS = {
-  rice_white_raw:   {name:"White rice, raw",        p:7.1,  c:80.0, f:0.7},
-  chicken_breast:   {name:"Chicken breast, raw",    p:22.5, c:0.0,  f:2.6},
-  ham_serrano:      {name:"Ham, Serrano (Sainsbury)", p:31.7, c:0.8, f:9.2},
-  egg_white:        {name:"Egg white, raw",         p:10.9, c:0.7,  f:0.2},
-  egg_whole:        {name:"Whole egg, raw",         p:12.6, c:0.7,  f:9.5},
-  oats_raw:         {name:"Oats, raw",              p:16.9, c:66.0, f:6.9},
-  sweet_potato_raw: {name:"Sweet potato, raw",      p:1.6,  c:20.0, f:0.1},
-  banana:           {name:"Banana",                 p:1.1,  c:23.0, f:0.3},
-  tomato_raw:       {name:"Tomatoes, raw",          p:0.9,  c:3.9,  f:0.2},
-  blueberries:      {name:"Blueberries",            p:0.7,  c:14.5, f:0.3},
-  greek_yogurt_0:   {name:"Greek yogurt, 0%",       p:10.0, c:3.6,  f:0.4},
-  whey_concentrate: {name:"Whey protein concentrate (1 scoop ≈30g)", p:80.0, c:8.0,  f:7.0},
-  whey_isolate:     {name:"Whey protein isolate (1 scoop ≈30g)",     p:90.0, c:2.0,  f:1.0},
-  milk_whole:       {name:"Milk, whole",              p:3.4,  c:4.8,  f:3.6},
-  ricotta:          {name:"Ricotta (Waitrose)",       p:7.5,  c:3.0,  f:12.0},
-  muller_protein_pudding: {name:"Müller × Myprotein High Protein Pudding (pot=200g)", p:10.0, c:6.6, f:2.3},
-  almond_milk_unsw: {name:"Almond milk, unsweetened (Alpro)", p:0.4,  c:0.0,  f:1.1},
-  fitbakes_keto_bread: {name:"Bread Keto (Fitbakes) — 1 slice = 25g", p:30.0, c:13.0, f:7.4},
-  olive_oil:        {name:"Olive oil",              p:0.0,  c:0.0,  f:100.0},
-  almonds:          {name:"Almonds",                p:21.0, c:22.0, f:50.0}
+  rice_white_raw:   {name:"White rice, raw",        p:7.1,  c:80.0, f:0.7,   def:75},
+  chicken_breast:   {name:"Chicken breast, raw",    p:22.5, c:0.0,  f:2.6,   def:150},
+  ham_serrano:      {name:"Ham, Serrano (Sainsbury)", p:31.7, c:0.8, f:9.2,  def:100},
+  egg_white:        {name:"Egg white, raw",         p:10.9, c:0.7,  f:0.2,   def:100},
+  egg_whole:        {name:"Whole egg, raw",         p:12.6, c:0.7,  f:9.5,   def:50},
+  oats_raw:         {name:"Oats, raw",              p:16.9, c:66.0, f:6.9,   def:50},
+  sweet_potato_raw: {name:"Sweet potato, raw",      p:1.6,  c:20.0, f:0.1,   def:150},
+  banana:           {name:"Banana",                 p:1.1,  c:23.0, f:0.3,   def:150},
+  tomato_raw:       {name:"Tomatoes, raw",          p:0.9,  c:3.9,  f:0.2,   def:100},
+  blueberries:      {name:"Blueberries",            p:0.7,  c:14.5, f:0.3,   def:100},
+  greek_yogurt_0:   {name:"Greek yogurt, 0%",       p:10.0, c:3.6,  f:0.4,   def:150},
+  whey_concentrate: {name:"Whey protein concentrate (1 scoop)", p:80.0, c:8.0,  f:7.0, def:30},
+  whey_isolate:     {name:"Whey protein isolate (1 scoop)",     p:90.0, c:2.0,  f:1.0, def:30},
+  milk_whole:       {name:"Milk, whole",              p:3.4,  c:4.8,  f:3.6, def:200},
+  ricotta:          {name:"Ricotta (Waitrose)",       p:7.5,  c:3.0,  f:12.0, def:100},
+  muller_protein_pudding: {name:"Müller × Myprotein High Protein Pudding (pot=200g)", p:10.0, c:6.6, f:2.3, def:200},
+  almond_milk_unsw: {name:"Almond milk, unsweetened (Alpro)", p:0.4,  c:0.0,  f:1.1, def:200},
+  fitbakes_keto_bread: {name:"Bread Keto (Fitbakes) — 1 slice = 25g", p:30.0, c:13.0, f:7.4, def:25},
+  olive_oil:        {name:"Olive oil",              p:0.0,  c:0.0,  f:100.0, def:10},
+  almonds:          {name:"Almonds",                p:21.0, c:22.0, f:50.0,  def:30}
 };
 const foodKcal = f => f.p*4 + f.c*4 + f.f*9;
 
@@ -305,7 +305,11 @@ function addFoodRow(key='chicken_breast', grams=150){
     `<td><input type="number" class="g" min="0" step="5" value="${grams}"></td>`+
     `<td class="cP">—</td><td class="cC">—</td><td class="cF">—</td><td class="cK">—</td>`+
     `<td><button class="del" title="remove">×</button></td>`;
-  tr.querySelector('.fSel').addEventListener('change', renderFoods);
+  tr.querySelector('.fSel').addEventListener('change', e => {
+    const def = FOODS[e.target.value].def;
+    if(def != null) tr.querySelector('.g').value = def;
+    renderFoods();
+  });
   tr.querySelector('.g').addEventListener('input', renderFoods);
   tr.querySelector('.del').addEventListener('click', ()=>{ tr.remove(); renderFoods(); });
   els.foodBody.appendChild(tr);
