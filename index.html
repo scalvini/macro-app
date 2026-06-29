@@ -195,6 +195,7 @@ let pct = {...DEFAULT};
 const FOODS = {
   rice_white_raw:   {name:"White rice, raw",        p:7.1,  c:80.0, f:0.7},
   chicken_breast:   {name:"Chicken breast, raw",    p:22.5, c:0.0,  f:2.6},
+  ham_serrano:      {name:"Ham, Serrano (Sainsbury)", p:31.7, c:0.8, f:9.2},
   egg_white:        {name:"Egg white, raw",         p:10.9, c:0.7,  f:0.2},
   egg_whole:        {name:"Whole egg, raw",         p:12.6, c:0.7,  f:9.5},
   oats_raw:         {name:"Oats, raw",              p:16.9, c:66.0, f:6.9},
@@ -202,11 +203,12 @@ const FOODS = {
   banana:           {name:"Banana",                 p:1.1,  c:23.0, f:0.3},
   tomato_raw:       {name:"Tomatoes, raw",          p:0.9,  c:3.9,  f:0.2},
   greek_yogurt_0:   {name:"Greek yogurt, 0%",       p:10.0, c:3.6,  f:0.4},
-  whey_concentrate: {name:"Whey protein concentrate", p:80.0, c:8.0,  f:7.0},
-  whey_isolate:     {name:"Whey protein isolate",     p:90.0, c:2.0,  f:1.0},
+  whey_concentrate: {name:"Whey protein concentrate (1 scoop ≈30g)", p:80.0, c:8.0,  f:7.0},
+  whey_isolate:     {name:"Whey protein isolate (1 scoop ≈30g)",     p:90.0, c:2.0,  f:1.0},
   milk_whole:       {name:"Milk, whole",              p:3.4,  c:4.8,  f:3.6},
+  ricotta:          {name:"Ricotta (Waitrose)",       p:7.5,  c:3.0,  f:12.0},
   almond_milk_unsw: {name:"Almond milk, unsweetened (Alpro)", p:0.4,  c:0.0,  f:1.1},
-  fitbakes_keto_bread: {name:"Fitbakes keto flaxseed bread (1 slice ≈23g)", p:30.0, c:13.0, f:7.4},
+  fitbakes_keto_bread: {name:"Bread Keto (Fitbakes) — 1 slice = 25g", p:30.0, c:13.0, f:7.4},
   olive_oil:        {name:"Olive oil",              p:0.0,  c:0.0,  f:100.0},
   almonds:          {name:"Almonds",                p:21.0, c:22.0, f:50.0}
 };
@@ -307,7 +309,15 @@ function addFoodRow(key='chicken_breast', grams=150){
   els.foodBody.appendChild(tr);
   renderFoods();
 }
-$('addFood').addEventListener('click', ()=> addFoodRow());
+$('addFood').addEventListener('click', ()=>{
+  const rows = els.foodBody.querySelectorAll('tr');
+  if(rows.length){
+    const last = rows[rows.length-1];
+    addFoodRow(last.querySelector('.fSel').value, Number(last.querySelector('.g').value) || 0);
+  } else {
+    addFoodRow('chicken_breast', 100);
+  }
+});
 
 function renderFoods(){
   let sum = {g:0, p:0, c:0, f:0, k:0};
