@@ -74,8 +74,10 @@
   .add{background:var(--field); border:1px dashed var(--line); color:var(--txt); cursor:pointer; border-radius:10px; padding:10px; width:100%; margin-top:10px; font-size:.9rem}
   .add:hover{border-color:var(--accent)}
   tfoot td{font-weight:700; border-top:2px solid var(--line)}
-  .remain td{color:var(--muted); font-weight:500; border-top:1px dashed var(--line)}
+  .target td{color:var(--muted); font-weight:500; border-top:1px dashed var(--line)}
+  .remain td{font-weight:600; border-top:1px dashed var(--line)}
   .over{color:#ff6b6b !important}
+  .under{color:#1ba874 !important}
   .muted{color:var(--muted); font-size:.85rem; margin:2px 0 0}
 </style>
 </head>
@@ -165,15 +167,20 @@
           <td id="tGrams">0 g</td>
           <td id="tP">0 g</td><td id="tC">0 g</td><td id="tF">0 g</td><td id="tK">0</td><td></td>
         </tr>
+        <tr class="target">
+          <td class="l">Daily target</td>
+          <td></td>
+          <td id="tgtP">—</td><td id="tgtC">—</td><td id="tgtF">—</td><td id="tgtK">—</td><td></td>
+        </tr>
         <tr class="remain">
-          <td class="l">Remaining vs target</td>
+          <td class="l">Left / over</td>
           <td></td>
           <td id="rP">—</td><td id="rC">—</td><td id="rF">—</td><td id="rK">—</td><td></td>
         </tr>
       </tfoot>
     </table>
     <button class="add" id="addFood">+ Add food</button>
-    <p class="muted">Values are per 100 g of the raw food. “Remaining” is your daily target minus what you’ve logged — negatives (in red) mean you’ve gone over.</p>
+    <p class="muted">Values are per 100 g of the raw food. The <b>Left / over</b> row compares your logged food to your daily target: <span class="under">green “left”</span> = you still have room, <span class="over">red “over”</span> = you’ve exceeded the target.</p>
   </div>
 
   <p class="foot">Macro kcal: protein &amp; carbs 4 kcal/g, fat 9 kcal/g. Food data are typical USDA raw values and will vary by product.</p>
@@ -198,7 +205,7 @@ const FOODS = {
   whey_concentrate: {name:"Whey protein concentrate", p:80.0, c:8.0,  f:7.0},
   whey_isolate:     {name:"Whey protein isolate",     p:90.0, c:2.0,  f:1.0},
   milk_whole:       {name:"Milk, whole",              p:3.4,  c:4.8,  f:3.6},
-  almond_milk_unsw: {name:"Almond milk, unsweetened", p:0.5,  c:0.3,  f:1.2},
+  almond_milk_unsw: {name:"Almond milk, unsweetened (Alpro)", p:0.4,  c:0.0,  f:1.1},
   fitbakes_keto_bread: {name:"Fitbakes keto flaxseed bread (1 slice ≈23g)", p:30.0, c:13.0, f:7.4},
   olive_oil:        {name:"Olive oil",              p:0.0,  c:0.0,  f:100.0},
   almonds:          {name:"Almonds",                p:21.0, c:22.0, f:50.0}
@@ -323,15 +330,27 @@ function renderFoods(){
   $('tK').textContent = Math.round(sum.k);
 
   const t = targetGrams();
+  // daily target row
+  $('tgtP').textContent = t.p.toFixed(0)+' g';
+  $('tgtC').textContent = t.c.toFixed(0)+' g';
+  $('tgtF').textContent = t.f.toFixed(0)+' g';
+  $('tgtK').textContent = Math.round(t.kcal);
+  // left / over row, in words
   const set = (id, val, unit) => {
     const el = $(id);
-    el.textContent = (val>=0?'':'−') + Math.abs(val).toFixed(0) + unit;
-    el.className = val < 0 ? 'over' : '';
+    const rounded = Math.abs(val).toFixed(0);
+    if(val >= 0){
+      el.textContent = rounded + unit + ' left';
+      el.className = 'under';
+    } else {
+      el.textContent = rounded + unit + ' over';
+      el.className = 'over';
+    }
   };
   set('rP', t.p - sum.p, ' g');
   set('rC', t.c - sum.c, ' g');
   set('rF', t.f - sum.f, ' g');
-  set('rK', t.kcal - sum.k, '');
+  set('rK', t.kcal - sum.k, ' kcal');
 }
 
 // seed a couple of example rows
