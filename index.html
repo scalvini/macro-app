@@ -20,6 +20,16 @@
   h1{font-size:1.5rem; margin:0 0 4px}
   h2{font-size:1.05rem; margin:0 0 14px}
   .sub{color:var(--muted); margin:0 0 24px; font-size:.92rem}
+  .tabs{display:flex; gap:6px; margin:0 0 18px; border-bottom:1px solid var(--line)}
+  .tab{background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); cursor:pointer; font-size:.95rem; font-weight:600; padding:10px 14px; margin-bottom:-1px}
+  .tab.active{color:var(--txt); border-bottom-color:var(--accent)}
+  .tab:hover{color:var(--txt)}
+  .panel.hidden{display:none}
+  .search{width:100%; font-size:1rem; background:var(--field); color:var(--txt); border:1px solid var(--line); border-radius:10px; padding:10px 14px; margin-bottom:14px}
+  .search:focus{outline:none; border-color:var(--accent)}
+  .addbtn{background:var(--accent); color:#fff; border:none; border-radius:8px; padding:6px 12px; font-size:.82rem; font-weight:600; cursor:pointer; white-space:nowrap}
+  .addbtn:hover{filter:brightness(1.05)}
+  .addbtn.added{background:var(--carbs)}
   .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:18px; box-shadow:0 1px 3px rgba(20,30,60,.05)}
   label{font-size:.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:6px}
   .cal-row{display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap}
@@ -86,6 +96,12 @@
   <h1>Macro Calculator</h1>
   <p class="sub">Set your daily calorie baseline, split it into protein / carbs / fat, then (optionally) log foods by grams to see how they stack up against your targets.</p>
 
+  <div class="tabs">
+    <button class="tab active" data-tab="calc">Calculator</button>
+    <button class="tab" data-tab="foods">Food list</button>
+  </div>
+
+  <div id="tab-calc" class="panel">
   <div class="card">
     <label for="cal">Total daily calories (baseline)</label>
     <div class="cal-row">
@@ -184,6 +200,21 @@
   </div>
 
   <p class="foot">Macro kcal: protein &amp; carbs 4 kcal/g, fat 9 kcal/g. Food data are typical USDA raw values and will vary by product.</p>
+  </div><!-- /tab-calc -->
+
+  <div id="tab-foods" class="panel hidden">
+    <div class="card">
+      <h2>Food list — per 100 g</h2>
+      <input type="text" class="search" id="foodSearch" placeholder="Search foods…">
+      <table>
+        <thead>
+          <tr><th class="l">Food</th><th>Protein</th><th>Carbs</th><th>Fat</th><th>kcal</th><th>Default</th><th></th></tr>
+        </thead>
+        <tbody id="foodListBody"></tbody>
+      </table>
+      <p class="muted">Values per 100 g (raw where relevant). “Default” is the serving size pre-filled when you add the food. “Add” drops it straight into your food log on the Calculator tab.</p>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -368,6 +399,40 @@ function renderFoods(){
   set('rF', t.f - sum.f, ' g');
   set('rK', t.kcal - sum.k, ' kcal');
 }
+
+// ---- food list tab ----
+function buildFoodList(filter=''){
+  const body = $('foodListBody');
+  const q = filter.trim().toLowerCase();
+  body.innerHTML = '';
+  Object.entries(FOODS).forEach(([k,v])=>{
+    if(q && !v.name.toLowerCase().includes(q)) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      `<td class="l">${v.name}</td>`+
+      `<td>${v.p.toFixed(1)} g</td><td>${v.c.toFixed(1)} g</td><td>${v.f.toFixed(1)} g</td>`+
+      `<td>${Math.round(foodKcal(v))}</td><td>${v.def != null ? v.def+' g' : '—'}</td>`+
+      `<td><button class="addbtn" data-key="${k}">Add</button></td>`;
+    tr.querySelector('.addbtn').addEventListener('click', e=>{
+      addFoodRow(k, FOODS[k].def != null ? FOODS[k].def : 100);
+      const b = e.target; b.textContent = 'Added ✓'; b.classList.add('added');
+      setTimeout(()=>{ b.textContent = 'Add'; b.classList.remove('added'); }, 1200);
+    });
+    body.appendChild(tr);
+  });
+}
+$('foodSearch').addEventListener('input', e => buildFoodList(e.target.value));
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const which = tab.dataset.tab;
+    $('tab-calc').classList.toggle('hidden', which !== 'calc');
+    $('tab-foods').classList.toggle('hidden', which !== 'foods');
+  });
+});
+buildFoodList();
 
 // seed a couple of example rows
 addFoodRow('chicken_breast', 200);
