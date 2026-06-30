@@ -47,6 +47,8 @@
     border-radius:999px; padding:7px 13px; font-size:.82rem;
   }
   .preset:hover{border-color:var(--accent)}
+  .preset.diet{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700}
+  .preset.diet:hover{filter:brightness(1.05)}
 
   .macro{display:grid; grid-template-columns:90px 1fr 132px; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--line)}
   .macro:last-of-type{border-bottom:none}
@@ -114,6 +116,7 @@
       <button class="preset" data-p="40" data-c="40" data-f="20">Lean bulk · 40/40/20</button>
       <button class="preset" data-p="35" data-c="5"  data-f="60">Keto · 35/5/60</button>
       <button class="preset" data-p="30" data-c="50" data-f="20">Endurance · 30/50/20</button>
+      <button class="preset diet" id="cuttingMS">🍽 Cutting MS</button>
     </div>
   </div>
 
@@ -315,13 +318,33 @@ function setMacro(key, value){
 });
 els.cal.addEventListener('input', render);
 
-document.querySelectorAll('.preset').forEach(btn=>{
+document.querySelectorAll('.preset[data-p]').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     pct = {p:+btn.dataset.p, c:+btn.dataset.c, f:+btn.dataset.f};
     render();
   });
 });
 $('reset').addEventListener('click', ()=>{ pct = {...DEFAULT}; els.cal.value = 2000; render(); });
+
+// ---- saved diet preset ----
+const MY_DIET = [
+  ['chicken_breast', 400],
+  ['rice_white_raw', 100],
+  ['ham_serrano', 100],
+  ['banana', 100],
+  ['blueberries', 75],
+  ['fitbakes_keto_bread', 75],
+  ['ricotta', 100],
+  ['whey_concentrate', 120],
+  ['almond_milk_unsw', 1000],
+  ['egg_white', 130]
+];
+function loadDiet(){
+  els.foodBody.innerHTML = '';
+  MY_DIET.forEach(([k,g]) => addFoodRow(k, g));
+  renderFoods();
+}
+$('cuttingMS').addEventListener('click', loadDiet);
 
 // ---- food log ----
 function foodOptions(selected){
@@ -377,12 +400,10 @@ function renderFoods(){
   $('tK').textContent = Math.round(sum.k);
 
   const t = targetGrams();
-  // daily target row
   $('tgtP').textContent = t.p.toFixed(0)+' g';
   $('tgtC').textContent = t.c.toFixed(0)+' g';
   $('tgtF').textContent = t.f.toFixed(0)+' g';
   $('tgtK').textContent = Math.round(t.kcal);
-  // left / over row, in words
   const set = (id, val, unit) => {
     const el = $(id);
     const rounded = Math.abs(val).toFixed(0);
@@ -434,9 +455,7 @@ document.querySelectorAll('.tab').forEach(tab=>{
 });
 buildFoodList();
 
-// seed a couple of example rows
-addFoodRow('chicken_breast', 200);
-addFoodRow('rice_white_raw', 100);
+// start with an empty food log — user adds foods, or clicks "Cutting MS" to load the saved diet
 render();
 </script>
 </body>
