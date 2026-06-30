@@ -249,7 +249,6 @@ const FOODS = {
   turkey_breast:    {name:"Turkey breast, raw",     p:22.0, c:0.0,  f:1.0,  def:150},
   cod_raw:          {name:"Cod, raw",               p:18.0, c:0.0,  f:0.7,  def:150},
   cottage_cheese:   {name:"Cottage cheese",         p:11.0, c:3.4,  f:4.3,  def:150},
-  casein_protein:   {name:"Casein protein (1 scoop)", p:78.0, c:8.0, f:1.5, def:30},
   brown_rice_raw:   {name:"Brown rice, raw",        p:7.5,  c:77.0, f:2.7,  def:75},
   broccoli_raw:     {name:"Broccoli, raw",          p:2.8,  c:7.0,  f:0.4,  def:100},
   peanut_butter:    {name:"Peanut butter",          p:25.0, c:20.0, f:50.0, def:30},
@@ -353,7 +352,7 @@ function loadDiet(){
   MY_DIET.forEach(([k,g]) => addFoodRow(k, g));
   renderFoods();
 }
-$('cuttingMS').addEventListener('click', loadDiet);
+$('cuttingMS').addEventListener('click', () => { els.cal.value = 2200; loadDiet(); render(); });
 
 // ---- food log ----
 function foodOptions(selected){
