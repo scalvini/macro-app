@@ -47,8 +47,6 @@
     border-radius:999px; padding:7px 13px; font-size:.82rem;
   }
   .preset:hover{border-color:var(--accent)}
-  .preset.diet{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700}
-  .preset.diet:hover{filter:brightness(1.05)}
 
   .macro{display:grid; grid-template-columns:90px 1fr 132px; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--line)}
   .macro:last-of-type{border-bottom:none}
@@ -116,7 +114,7 @@
       <button class="preset" data-p="40" data-c="40" data-f="20">Lean bulk · 40/40/20</button>
       <button class="preset" data-p="35" data-c="5"  data-f="60">Keto · 35/5/60</button>
       <button class="preset" data-p="30" data-c="50" data-f="20">Endurance · 30/50/20</button>
-      <button class="preset diet" id="cuttingMS">🍽 Cutting MS</button>
+      <button class="preset" id="cuttingMS">Cutting MS</button>
     </div>
   </div>
 
@@ -245,10 +243,21 @@ const FOODS = {
   muller_protein_pudding: {name:"Müller × Myprotein High Protein Pudding (pot=200g)", p:10.0, c:6.6, f:2.3, def:200},
   almond_milk_unsw: {name:"Almond milk, unsweetened (Alpro)", p:0.4,  c:0.0,  f:1.1, def:200},
   fitbakes_keto_bread: {name:"Bread Keto (Fitbakes) — 1 slice = 25g", p:30.0, c:13.0, f:7.4, def:25},
+  salmon_raw:       {name:"Salmon, raw",            p:20.0, c:0.0,  f:13.0, def:150},
+  tuna_canned:      {name:"Tuna, canned in water",  p:25.0, c:0.0,  f:1.0,  def:100},
+  beef_mince_5:     {name:"Beef mince 5% fat, raw", p:21.0, c:0.0,  f:5.0,  def:150},
+  turkey_breast:    {name:"Turkey breast, raw",     p:22.0, c:0.0,  f:1.0,  def:150},
+  cod_raw:          {name:"Cod, raw",               p:18.0, c:0.0,  f:0.7,  def:150},
+  cottage_cheese:   {name:"Cottage cheese",         p:11.0, c:3.4,  f:4.3,  def:150},
+  casein_protein:   {name:"Casein protein (1 scoop)", p:78.0, c:8.0, f:1.5, def:30},
+  brown_rice_raw:   {name:"Brown rice, raw",        p:7.5,  c:77.0, f:2.7,  def:75},
+  broccoli_raw:     {name:"Broccoli, raw",          p:2.8,  c:7.0,  f:0.4,  def:100},
+  peanut_butter:    {name:"Peanut butter",          p:25.0, c:20.0, f:50.0, def:30},
   olive_oil:        {name:"Olive oil",              p:0.0,  c:0.0,  f:100.0, def:10},
   almonds:          {name:"Almonds",                p:21.0, c:22.0, f:50.0,  def:30}
 };
 const foodKcal = f => f.p*4 + f.c*4 + f.f*9;
+const sortedFoodEntries = () => Object.entries(FOODS).sort((a,b)=> a[1].name.localeCompare(b[1].name));
 
 const $ = id => document.getElementById(id);
 const els = {
@@ -348,7 +357,7 @@ $('cuttingMS').addEventListener('click', loadDiet);
 
 // ---- food log ----
 function foodOptions(selected){
-  return Object.entries(FOODS).map(([k,v]) =>
+  return sortedFoodEntries().map(([k,v]) =>
     `<option value="${k}" ${k===selected?'selected':''}>${v.name}</option>`).join('');
 }
 
@@ -400,10 +409,12 @@ function renderFoods(){
   $('tK').textContent = Math.round(sum.k);
 
   const t = targetGrams();
+  // daily target row
   $('tgtP').textContent = t.p.toFixed(0)+' g';
   $('tgtC').textContent = t.c.toFixed(0)+' g';
   $('tgtF').textContent = t.f.toFixed(0)+' g';
   $('tgtK').textContent = Math.round(t.kcal);
+  // left / over row, in words
   const set = (id, val, unit) => {
     const el = $(id);
     const rounded = Math.abs(val).toFixed(0);
@@ -426,7 +437,7 @@ function buildFoodList(filter=''){
   const body = $('foodListBody');
   const q = filter.trim().toLowerCase();
   body.innerHTML = '';
-  Object.entries(FOODS).forEach(([k,v])=>{
+  sortedFoodEntries().forEach(([k,v])=>{
     if(q && !v.name.toLowerCase().includes(q)) return;
     const tr = document.createElement('tr');
     tr.innerHTML =
