@@ -360,23 +360,21 @@ $('reset').addEventListener('click', ()=>{ pct = {...DEFAULT}; els.cal.value = 2
 
 // ---- saved diet preset ----
 const MY_DIET = [
-  ['chicken_breast', 400],
-  ['rice_white_raw', 100],
+  ['chicken_breast', 600],
+  ['rice_white_raw', 160],
   ['ham_serrano', 100],
-  ['banana', 100],
   ['blueberries', 75],
   ['fitbakes_keto_bread', 75],
-  ['ricotta', 100],
   ['whey_concentrate', 120],
   ['almond_milk_unsw', 1000],
-  ['egg_white', 260]
+  ['egg_white', 130]
 ];
 function loadDiet(){
   els.foodBody.innerHTML = '';
   MY_DIET.forEach(([k,g]) => addFoodRow(k, g));
   renderFoods();
 }
-$('cuttingMS').addEventListener('click', () => { els.cal.value = 2200; loadDiet(); render(); });
+$('cuttingMS').addEventListener('click', () => { els.cal.value = 2500; loadDiet(); render(); });
 
 // ---- food log ----
 function foodOptions(selected){
